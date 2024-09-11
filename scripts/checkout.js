@@ -1,23 +1,11 @@
-/// Optional: when importing a lot of values, you
-// can put each value on a separate line to make
-// the code easier to read.
-import {
-  cart,
-  removeFromCart,
-  calculateCartQuantity,
-  updateQuantity
-} from '../data/cart.js';
+
+import {cart,removeFromCart,calculateCartQuantity,updateQuantity,updateDeliveryOption} from '../data/cart.js';
 import {products} from '../data/products.js';
 import {formatCurrency} from './utils/money.js';
 import {hello} from 'https://unpkg.com/supersimpledev@1.0.1/hello.esm.js';
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js'
 import { deliveryOptions } from '../data/deliveryOptions.js';
 hello();
-
-
-const today = dayjs();
-const deliveryDate = today.add(7,'days')
-console.log(deliveryDate.format('dddd, MMMM D'));
 
 let cartSummaryHTML = '';
 
@@ -35,7 +23,11 @@ cart.forEach((cartItem) => {
   const deliveryOptionId=cartItem.deliveryOptionId;
   let deliveryOption;
   deliveryOptions.forEach((items)=>{
+    console.log(items) 
+    console.log(deliveryOptionId) 
+
     if(items.id===deliveryOptionId){deliveryOption=items}
+    else{console.log('erro')}
   })
   const today = dayjs();
   const deliveryDate = today.add(deliveryOption.deliveryDays,'days')
@@ -100,7 +92,7 @@ function deliveryOptionsHTML (matchingProduct,cartItem){
       let priceString;
       if(deliveryOption.priceCents===0){priceString = "FREE DELIVERY"}
       else {priceString=`$${(formatCurrency(deliveryOption.priceCents))}`}
-      html+=`<div class="delivery-option">
+      html+=`<div class="delivery-option js-delivery-option" data-product-id="${matchingProduct.id}" data-delivery-option-id="${deliveryOption.id}">
         <input type="radio" ${isChecked?'checked': ''}
           class="delivery-option-input"
           name="delivery-option-${matchingProduct.id}">
@@ -190,3 +182,10 @@ document.querySelectorAll('.js-update-link')
       updateCartQuantity();
     });
   });
+
+document.querySelectorAll('.js-delivery-option').forEach((element)=>{
+  element.addEventListener('click',()=>{
+    const {productId,deliveryOptionId} = element.dataset
+    console.log(`Clicked delivery option - Product ID: ${productId}, Delivery Option ID: ${deliveryOptionId}`);
+    updateDeliveryOption(productId,deliveryOptionId)})
+})
